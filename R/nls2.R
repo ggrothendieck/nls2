@@ -1,0 +1,75 @@
+nls2 <- function(formula, data = parent.frame(), start, control = nls.control(),
+	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search"), ...,
+	all = FALSE) { 
+
+	L <- (list(formula = formula, data = data, control = control))
+	if (!missing(start)) { 
+		if (inherits(start, "nls")) start <- coef(start)
+		L$start <- start
+	}
+	finIter <- NROW(L$start)
+	L <- append(L, list(...))
+	algorithm <- match.arg(algorithm)
+	if (algorithm == "grid-search") algorithm <- "brute-force"
+	call <- match.call()
+	if (algorithm == "brute-force" || algorithm == "random-search") {
+	   nls <- function(formula, data, start, ...) {
+	      nlsModel <- stats:::nlsModel
+	      environment(nlsModel) <- environment()
+	      #  disable nlsModel gradient error
+	      stop <- function(...) {
+	        msg <- "singular gradient matrix at initial parameter estimates"
+	        if (list(...)[[1]] == msg) return()
+	        stop(...)
+	      }
+	      structure(list(m = nlsModel(formula, data, start), 
+	         call = call,
+	         convInfo = list(isConv = TRUE, finIter = finIter,
+			finTol = NA)), class = "nls")
+	   }
+	} else L$algorithm <- algorithm
+
+	if (missing(start)) return(do.call(nls, L))
+	else L$start <- as.data.frame(as.list(start))
+
+	if (NROW(L$start) == 1) return(do.call(nls, L))
+
+	if (NROW(L$start) == 2) {
+	   if (algorithm == "brute-force") {
+		rng <- as.data.frame(lapply(start, range))
+		mn <- rng[1,]
+		mx <- rng[2,]
+		# k is number of points in each dimension to take
+		# so that cross product is close to maxiter points.
+		k1 <- pmax(ceiling(sum(mx > mn)), 1)
+		k <- pmax(ceiling(control$maxiter ^ (1/k1)), 1)
+		DF <- as.data.frame(rbind(mn, mx, k))
+		# L$start <- expand.grid(by(DF, 1:NROW(DF), do.call, what = 
+			#function(from, to, len) seq(from, to, length = len)))
+		finIter <- k^k1
+		L$start <- expand.grid(lapply(DF, 
+			function(x) seq(x[1], x[2], length = x[3])))
+	   } else {
+		finIter <- control$maxiter
+		u <- matrix(runif(finIter * NCOL(start)), NCOL(start))
+		L$start <- t(u * unlist(start[1,]) + (1-u) * unlist(start[2,]))
+		L$start <- as.data.frame(L$start)
+		names(L$start) <- names(start)
+	   }
+		
+	}
+
+	result <- apply(L$start, 1, function(start) {
+		L$start <- start
+        # 1/29/2008 changes changes
+		xx <- try(do.call(nls, L))
+        yy <- if (inherits(xx, "try-error")) NA else xx
+        print(yy)
+        yy
+	})
+	if (all) result else {
+		ss <- lapply(result, function(x) sum(resid(x)^2))
+		result[[which.min(ss)]]
+	}
+}
+

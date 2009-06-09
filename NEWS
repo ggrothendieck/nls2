@@ -1,0 +1,40 @@
+VERSION 0.1-3
+
+o nls2.Rd improvements
+
+o added algorithm = "random" which samples maxiter rows from start if
+  start is a data frame with more than 2 rows whereas if start is a data
+  frame with exactly 2 rows it will take maxiter random points from the
+  rectangle whose boundary is defined by the rows.
+
+o a maximum rather than a minimum of maxiter starting values are 
+  generated - todo
+
+o if start is a data frame with n+1 rows where n is the number of
+  parameters to optimize then Nelder Mead is used first - todo
+
+o if plinear then brute force should optimize over nonlinear portion
+  and use lm to get linear portion - todo
+
+o add minpack.lm interface - todo
+
+VERSION 0.1-2
+
+o fixed problem with update not working with objects produced by nls2.
+
+o fixed number of iterations and tolerance displayed when using
+  algorithm = "brute-force".
+
+o if there are exactly two rows in start= then a grid of starting values
+  is formed so that there are at least maxiter points on the grid.
+
+o start can be an nls object in which case coef(nls) is used.
+
+VERSION 0.1-1
+
+o documentation and DESCRIPTION file tweaks.
+
+VERSION 0.1-0
+
+o initial release.
+
