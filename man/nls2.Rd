@@ -137,6 +137,23 @@ DF1 <- data.frame(y=1:9, one=rep(1,9))
 xx <- nls2(y~(a+2*b)*one, DF1, start = c(a=1, b=1), algorithm = "brute-force")
 svd(xx$m$Rmat())[-2]
 
+## Example 5
+
+# Use plinear algorithm to reduce a 4 parameter model to a model with 
+# 2 linear and 2 nonlinear parameters
+
+library(NISTnls) # Ratkowsky2 data set
+# fo corresponds to the model on page 13 of Huet et al.
+fo <- y ~ cbind(rep(1, 9), exp(- exp(p3+p4*log(x))))
+st <- data.frame(p3 = c(-100,100), p4 = c(-100, 100))
+rat.nls <- nls2(fo, Ratkwosky2, start = st,
+	control = nls.control(maxiter = 200), algorithm = "plinear")
+rat.nls
+rat2.nls <- nls2(fo, Ratkowsky2, start = rat.nls, algorithm = "plinear")
+rat2.nls
+
+
+
 }
 \keyword{nonlinear}
 \keyword{regression}
