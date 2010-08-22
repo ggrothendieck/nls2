@@ -2,13 +2,13 @@
 \alias{as.lm.nls}
 \alias{as.lm}
 \title{
-Linearize an \code{"nls"} object.
+Linearize an nls object.
 }
 \description{
 Given an \code{"nls"} object, this method produces an \code{"lm"} object which approximates it.  
 }
 \usage{
-as.lm.nls(object, ...)
+\method{as.lm}{nls}(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
