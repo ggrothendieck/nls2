@@ -26,7 +26,12 @@ nls2 <- function(formula, data = parent.frame(), start, control = nls.control(),
 	        if (list(...)[[1]] == msg) return()
 	        stop(...)
 	      }
-	      structure(list(m = nlsModel(formula, data, start), 
+		  m <- if ("weights" %in% names(list(...))) {
+			  nlsModel(formula, data, start, list(...)$weights)
+		  } else {
+			  nlsModel(formula, data, start)
+		  }
+	      structure(list(m = m,
 	         call = call,
 	         convInfo = list(isConv = TRUE, finIter = finIter,
 			finTol = NA)), class = "nls")
