@@ -6,7 +6,7 @@
   parameters of a nonlinear model.
 }
 \usage{
-nls2(formula, data = parent.frame(), start, control = nls.control(), 
+nls2(formula, data = parent.frame(), start, weights, control = nls.control(), 
 	algorithm = c("default", "plinear", "port", "brute-force", 
 	"grid-search", "random-search"), \dots, all = FALSE)
 }
@@ -22,6 +22,7 @@ nls2(formula, data = parent.frame(), start, control = nls.control(),
     be run with the starting value defined by each row successively or (3) it 
     may be an \code{nls} object in which case the \code{coef} of the object will
     be used as the starting value.}
+  \item{weights}{For weighted regression.}
   \item{control}{same as \code{control} parameter in \code{nls}.}
   \item{algorithm}{same as \code{algorithm} parameter in \code{nls}
     with the addition of the \code{"brute-force"} (alternately called 
