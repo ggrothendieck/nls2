@@ -1,3 +1,7 @@
+VERSION 0.1-5
+
+o corce formula argument to a formula if its not already a formula
+
 VERSION 0.1-4 
 
 o NAMESPACE file added

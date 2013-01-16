@@ -3,6 +3,8 @@ nls2 <- function(formula, data = parent.frame(), start, weights,
 	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search"), ...,
 	all = FALSE) { 
 
+	if (!inherits(formula, "formula")) formula <- as.formula(formula, 
+		env = parent.frame())
 	L <- (list(formula = formula, data = data, control = control))
 	if (!missing(start)) { 
 		if (inherits(start, "nls")) {
