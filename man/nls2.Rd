@@ -147,18 +147,31 @@ svd(xx$m$Rmat())[-2]
 
 ## Example 5
 
-# Use plinear algorithm to reduce a 4 parameter model to a model with 
-# 2 linear and 2 nonlinear parameters
+# Use "plinear" or "plinear-brute" to reduce a 4 parameter model to a model 
+# with 2 linear and 2 nonlinear parameters
 
 \dontrun{
 data(Ratkowsky2, package = "NISTnls") # Ratkowsky2 data set
 # fo corresponds to the model on page 13 of Huet et al.
+
 fo <- y ~ cbind(rep(1, 9), exp(- exp(p3+p4*log(x))))
 st <- data.frame(p3 = c(-100,100), p4 = c(-100, 100))
+
+# perform 200 plinear fits starting at each point on grid formed from 
+#   nonlinear parameters (p3, p4) only and return best
+
 rat.nls <- nls2(fo, Ratkowsky2, start = st,
 	control = nls.control(maxiter = 200), algorithm = "plinear")
 rat.nls
-rat2.nls <- nls2(fo, Ratkowsky2, start = rat.nls, algorithm = "plinear")
+
+# evaluate nonlinear terms on grid of 200 points of p3, p4 and get 
+#   corresponding optimum linear coefficients.  Although this does much
+#   less than the prior example it might be preferred in those cases
+#   where plinear consistently fails.  In this particular case rat.nls did
+#   not fail so it would be the preferred approach.
+
+rat2.nls <- nls2(fo, Ratkowsky2, start = st,
+	control = nls.control(maxiter = 200), algorithm = "plinear-brute")
 rat2.nls
 }
 
