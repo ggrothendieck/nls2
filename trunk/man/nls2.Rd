@@ -8,7 +8,8 @@
 \usage{
 nls2(formula, data = parent.frame(), start, weights, control = nls.control(), 
 	algorithm = c("default", "plinear", "port", "brute-force", 
-	"grid-search", "random-search"), \dots, all = FALSE)
+	"grid-search", "random-search", 
+	"plinear-brute", "plinear-random"), \dots, all = FALSE)
 }
 \arguments{
   \item{formula}{same as \code{formula} parameter in \code{nls}.}
@@ -26,7 +27,8 @@ nls2(formula, data = parent.frame(), start, weights, control = nls.control(),
   \item{control}{same as \code{control} parameter in \code{nls}.}
   \item{algorithm}{same as \code{algorithm} parameter in \code{nls}
     with the addition of the \code{"brute-force"} (alternately called 
-    \code{"grid-search"}) and \code{"random-search"} options.}
+    \code{"grid-search"}), \code{"random-search"}, 
+    \code{"plinear-brute"} and \code{"plinear-random"} options.}
   \item{\dots}{other arguments passed to \code{nls}.}
   \item{all}{if \code{all} is true then a list of \code{nls} objects is
     returned, one for each row in \code{start}; otherwise, only the one
@@ -53,6 +55,11 @@ nls2(formula, data = parent.frame(), start, weights, control = nls.control(),
   from the rectangle it defines or (2) if \code{start} is a data frame with
   more than two rows then the \code{"maxiter"} rows are sampled without 
   replacement.  
+
+  \code{"plinear-brute"} and \code{"plinear-random"} are like
+  \code{"brute-force"} and \code{"random-search"} except that the formula
+  is a plinear-style formula and only starting values for the non-linear
+  parameters are given.
 
   If algorithm is neither of the above two values then if start has more than
   one row a two phase procedure is undertaken.  (1) if \code{start} 
@@ -144,11 +151,11 @@ svd(xx$m$Rmat())[-2]
 # 2 linear and 2 nonlinear parameters
 
 \dontrun{
-data(Ratkowsky, package = "NISTnls") # Ratkowsky2 data set
+data(Ratkowsky2, package = "NISTnls") # Ratkowsky2 data set
 # fo corresponds to the model on page 13 of Huet et al.
 fo <- y ~ cbind(rep(1, 9), exp(- exp(p3+p4*log(x))))
 st <- data.frame(p3 = c(-100,100), p4 = c(-100, 100))
-rat.nls <- nls2(fo, Ratkwosky2, start = st,
+rat.nls <- nls2(fo, Ratkowsky2, start = st,
 	control = nls.control(maxiter = 200), algorithm = "plinear")
 rat.nls
 rat2.nls <- nls2(fo, Ratkowsky2, start = rat.nls, algorithm = "plinear")

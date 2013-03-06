@@ -1,3 +1,9 @@
+VERSION 0.2-0
+
+o algoirthm can be "plinear-brute" or "plinear-random"
+
+o corrected one nls2 example
+
 VERSION 0.1-5
 
 o corce formula argument to a formula if its not already a formula
