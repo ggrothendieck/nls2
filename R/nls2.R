@@ -1,6 +1,6 @@
 nls2 <- function(formula, data = parent.frame(), start, weights, 
 	control = nls.control(),
-	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search"), ...,
+	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search", "plinear-brute", "plinear-random"), ...,
 	all = FALSE) { 
 
 	if (!inherits(formula, "formula")) formula <- as.formula(formula, 
@@ -19,9 +19,12 @@ nls2 <- function(formula, data = parent.frame(), start, weights,
 	algorithm <- match.arg(algorithm)
 	if (algorithm == "grid-search") algorithm <- "brute-force"
 	call <- match.call()
-	if (algorithm == "brute-force" || algorithm == "random-search") {
+	if (algorithm == "brute-force" || algorithm == "random-search" ||
+	  algorithm == "plinear-brute" || algorithm == "plinear-random") {
 	   nls <- function(formula, data, start, weights, ...) {
-	      nlsModel <- stats:::nlsModel
+	      nlsModel <- if (algorithm == "plinear-brute" || 
+		algorithm == "plinear-random") stats:::nlsModel.plinear
+	        else stats:::nlsModel
 	      environment(nlsModel) <- environment()
 	      #  disable nlsModel gradient error
 	      stop <- function(...) {
@@ -48,7 +51,7 @@ nls2 <- function(formula, data = parent.frame(), start, weights,
 	if (NROW(L$start) == 1) return(do.call(nls, L))
 
 	if (NROW(L$start) == 2) {
-	   if (algorithm == "brute-force") {
+	   if (algorithm == "brute-force" || algorithm == "plinear-brute") {
 		rng <- as.data.frame(lapply(start, range))
 		mn <- rng[1,]
 		mx <- rng[2,]
@@ -88,4 +91,5 @@ nls2 <- function(formula, data = parent.frame(), start, weights,
 		result[[which.min(ss)]]
 	}
 }
+
 

@@ -1,6 +1,6 @@
 Package: nls2
-Version: 0.1-5
-Date: 2013-01-16
+Version: 0.2
+Date: 2013-03-06
 Title: Non-linear regression with brute force
 Author: G. Grothendieck
 Maintainer: G. Grothendieck <ggrothendieck@gmail.com>
