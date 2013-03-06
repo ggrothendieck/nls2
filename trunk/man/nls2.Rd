@@ -163,17 +163,27 @@ st <- data.frame(p3 = c(-100,100), p4 = c(-100, 100))
 rat.nls <- nls2(fo, Ratkowsky2, start = st,
 	control = nls.control(maxiter = 200), algorithm = "plinear")
 rat.nls
-
-# evaluate nonlinear terms on grid of 200 points of p3, p4 and get 
-#   corresponding optimum linear coefficients.  Although this does much
-#   less than the prior example it might be preferred in those cases
-#   where plinear consistently fails.  In this particular case rat.nls did
-#   not fail so it would be the preferred approach.
-
-rat2.nls <- nls2(fo, Ratkowsky2, start = st,
-	control = nls.control(maxiter = 200), algorithm = "plinear-brute")
-rat2.nls
 }
+
+# thanks to John Nash for this example
+pastured <- data.frame(
+  time=c(9, 14, 21, 28, 42, 57, 63, 70, 79),
+  yield= c(8.93, 10.8, 18.59, 22.33, 39.35,
+         56.11, 61.73, 64.62, 67.08))
+  fo <- yield ~ cbind(1, - exp(-exp(t3+t4*log(time))))
+gstart <- data.frame(t3 = c(1, 40), t4 = c(1, 8))
+
+\dontrun{
+# fails on plinear
+past.p <- nls2(fo, data = pastured, start = gstart, algorithm = "plinear")
+past.p
+}
+
+# but "plinear-random" gets an answer
+set.seed(123)
+past.pr <- nls2(fo, data = pastured, start = gstart, 
+	algorithm = "plinear-random")
+past.pr
 
 }
 \keyword{nonlinear}
