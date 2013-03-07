@@ -6,10 +6,10 @@
   parameters of a nonlinear model.
 }
 \usage{
-nls2(formula, data = parent.frame(), start, weights, control = nls.control(), 
+nls2(formula, data = parent.frame(), start, control = nls.control(),
 	algorithm = c("default", "plinear", "port", "brute-force", 
-	"grid-search", "random-search", 
-	"plinear-brute", "plinear-random"), \dots, all = FALSE)
+	"grid-search", "random-search", "plinear-brute", "plinear-random"), 
+	trace = FALSE, weights, \dots, all = FALSE)
 }
 \arguments{
   \item{formula}{same as \code{formula} parameter in \code{nls}.}
@@ -23,12 +23,13 @@ nls2(formula, data = parent.frame(), start, weights, control = nls.control(),
     be run with the starting value defined by each row successively or (3) it 
     may be an \code{nls} object in which case the \code{coef} of the object will
     be used as the starting value.}
-  \item{weights}{For weighted regression.}
   \item{control}{same as \code{control} parameter in \code{nls}.}
   \item{algorithm}{same as \code{algorithm} parameter in \code{nls}
     with the addition of the \code{"brute-force"} (alternately called 
     \code{"grid-search"}), \code{"random-search"}, 
     \code{"plinear-brute"} and \code{"plinear-random"} options.}
+  \item{trace}{If \code{TRUE} certain intermedidate results shown.}
+  \item{weights}{For weighted regression.}
   \item{\dots}{other arguments passed to \code{nls}.}
   \item{all}{if \code{all} is true then a list of \code{nls} objects is
     returned, one for each row in \code{start}; otherwise, only the one
@@ -168,22 +169,13 @@ rat.nls
 # thanks to John Nash for this example
 pastured <- data.frame(
   time=c(9, 14, 21, 28, 42, 57, 63, 70, 79),
-  yield= c(8.93, 10.8, 18.59, 22.33, 39.35,
-         56.11, 61.73, 64.62, 67.08))
-  fo <- yield ~ cbind(1, - exp(-exp(t3+t4*log(time))))
-gstart <- data.frame(t3 = c(1, 40), t4 = c(1, 8))
+  yield= c(8.93, 10.8, 18.59, 22.33, 39.35, 56.11, 61.73, 64.62, 67.08))
+fo <- yield ~ cbind(1, - exp(-exp(t3+t4*log(time))))
 
-\dontrun{
-# fails on plinear
-past.p <- nls2(fo, data = pastured, start = gstart, algorithm = "plinear")
-past.p
-}
-
-# but "plinear-random" gets an answer
-set.seed(123)
-past.pr <- nls2(fo, data = pastured, start = gstart, 
-	algorithm = "plinear-random")
-past.pr
+gstart <- data.frame(t3 = c(-10, 10), t4 = c(1, 8))
+fm <- nls2(fo, data = pastured, start = gstart, alg = "plinear",
+   control = nls.control(maxiter = 1000))
+fm
 
 }
 \keyword{nonlinear}

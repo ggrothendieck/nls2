@@ -1,11 +1,11 @@
-nls2 <- function(formula, data = parent.frame(), start, weights, 
+nls2 <- function(formula, data = parent.frame(), start, 
 	control = nls.control(),
-	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search", "plinear-brute", "plinear-random"), ...,
-	all = FALSE) { 
+	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search", "plinear-brute", "plinear-random"), 
+	trace = FALSE, weights, ..., all = FALSE) { 
 
 	if (!inherits(formula, "formula")) formula <- as.formula(formula, 
 		env = parent.frame())
-	L <- (list(formula = formula, data = data, control = control))
+	L <- list(formula = formula, data = data, control = control, trace = trace)
 	if (!missing(start)) { 
 		if (inherits(start, "nls")) {
 			start <- coef(start)
@@ -75,21 +75,25 @@ nls2 <- function(formula, data = parent.frame(), start, weights,
 		
 	}
 
+	# each component of result is the result of one run
 	result <- apply(L$start, 1, function(start) {
 		L$start <- start
-        # 1/29/2008 changes
 		xx <- try(do.call(nls, L))
-        yy <- if (inherits(xx, "try-error")) NA else xx
-        print(yy)
-        yy
+		yy <- if (inherits(xx, "try-error")) NA else xx
+		if (trace) print(yy)
+		yy
 	})
-	if (all) result else {
-		# ss <- lapply(result, function(x) if (identical(x, NA)) NA else sum(resid(x)^2))
-		# deviance gives the sum of squares of the residuals
+
+	# insert data argument and if !all take only result with minimum RSS
+	if (all) {
+		for(i in seq_along(result)) result[[i]]$data <- substitute(data)
+	} else {
 		ss <- lapply(result, function(x) if (identical(x, NA)) NA 
-			else deviance(x))
-		result[[which.min(ss)]]
+			else deviance(x)) # deviance is residual sum of squares
+		result <- result[[which.min(ss)]]
+		result$data <- substitute(data)
 	}
+	result
 }
 
 
