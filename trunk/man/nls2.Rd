@@ -148,25 +148,10 @@ svd(xx$m$Rmat())[-2]
 
 ## Example 5
 
-# Use "plinear" or "plinear-brute" to reduce a 4 parameter model to a model 
-# with 2 linear and 2 nonlinear parameters
+# plinear example 
+# Thanks to John Nash for suggesting this truncation of the 
+# Ratkowsky2 dataset. Full dataset: data(Ratkowsky2, package = "NISTnls")
 
-\dontrun{
-data(Ratkowsky2, package = "NISTnls") # Ratkowsky2 data set
-# fo corresponds to the model on page 13 of Huet et al.
-
-fo <- y ~ cbind(rep(1, 9), exp(- exp(p3+p4*log(x))))
-st <- data.frame(p3 = c(-100,100), p4 = c(-100, 100))
-
-# perform 200 plinear fits starting at each point on grid formed from 
-#   nonlinear parameters (p3, p4) only and return best
-
-rat.nls <- nls2(fo, Ratkowsky2, start = st,
-	control = nls.control(maxiter = 200), algorithm = "plinear")
-rat.nls
-}
-
-# thanks to John Nash for this example
 pastured <- data.frame(
   time=c(9, 14, 21, 28, 42, 57, 63, 70, 79),
   yield= c(8.93, 10.8, 18.59, 22.33, 39.35, 56.11, 61.73, 64.62, 67.08))
