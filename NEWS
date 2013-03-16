@@ -1,6 +1,8 @@
 VERSION 0.2-1
 
-o bug fix for case when there is only one parameter
+o bug fix for case of only one parameter
+
+o start may now also be any object with a coef method
 
 VERSION 0.2-0
 
