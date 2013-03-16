@@ -1,3 +1,7 @@
+VERSION 0.2-1
+
+o bug fix for case when there is only one parameter
+
 VERSION 0.2-0
 
 o algoirthm can be "plinear-brute" or "plinear-random"
