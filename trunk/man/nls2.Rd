@@ -21,7 +21,8 @@ nls2(formula, data = parent.frame(), start, control = nls.control(),
     or will start at \code{maxiter} random points within the defined rectangle,
     (2) a data frame with more than two rows in which case an optimization will
     be run with the starting value defined by each row successively or (3) it 
-    may be an \code{nls} object in which case the \code{coef} of the object will
+    may be an \code{nls} or other object having a \code{coef} method in 
+    which case the \code{coef} of the object will
     be used as the starting value.}
   \item{control}{same as \code{control} parameter in \code{nls}.}
   \item{algorithm}{same as \code{algorithm} parameter in \code{nls}
