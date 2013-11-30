@@ -49,6 +49,9 @@ nls2 <- function(formula, data = parent.frame(), start,
 	   }
 	} else L$algorithm <- algorithm
 
+	if (!missing(weights)) L$weights <- 
+			  eval(substitute(weights), data, environment(formula))
+
 	# here nls may be nls, nlsModel or nlsModel.plinear 
 	#  depending on algorithm=
 	if (missing(start)) return(do.call(nls, L))
