@@ -1,3 +1,25 @@
+VERSION 0.3
+
+o add lhs (Latin Hypercube Sampling) and plinear-lhs sampling algorithms
+
+o if all iterations fail return NULL
+
+o add README file
+
+o add INSTALL file
+
+o fix Example 5 in help file and change it to use plinear-lhs
+
+o fix number of iterations.  Previously 1 iteration could display incorrectly.
+
+o fix weights. Do not ignore weights (includes contribution by Ben Bolker)
+
+o fix subset. Do not ignore subset argument.  Note that if subset is specified 
+  then data must be specified as a data.frame.
+
+o add caveat to help file regarding start argument not supporting the nls
+  grouped data list of vector format
+
 VERSION 0.2-1
 
 o bug fix for case of only one parameter

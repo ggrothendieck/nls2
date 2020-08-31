@@ -1,14 +1,27 @@
 nls2 <- function(formula, data = parent.frame(), start, 
 	control = nls.control(),
-	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search", "plinear-brute", "plinear-random"), 
-	trace = FALSE, weights, ..., all = FALSE) { 
+	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search", "lhs", "plinear-brute", "plinear-random", "plinear-lhs"), 
+	trace = FALSE, weights, subset, ..., all = FALSE) { 
+
+	makeFun <- function(FUN, PKG = "stats") {
+		s <- paste0(PKG, ":::", FUN)
+		eval.parent(parse(text = s))
+	}
 
 	# if formula is not of class "formula" convert it to "formula" class
 	if (!inherits(formula, "formula")) formula <- as.formula(formula, 
 		env = parent.frame())
 
+	data.arg <- substitute(data)
+	subset.arg <- if (!missing(subset)) substitute(subset) else TRUE
+
+	if (!missing(subset)) {
+		if (is.data.frame(data)) data <- data[with(data, subset), ]
+		else stop("data must be a specified as a data.frame if subset specified")
+	}
+
 	# recostruct arguments
-	L <- list(formula = formula, data = data, control = control, trace = trace)
+	L <- list(formula = formula, data = substitute(data), control = control, trace = trace)
 	if (!missing(start)) { 
 		co <- try(coef(start), silent = TRUE)
 		if (!inherits(co, "try-error") && !is.null(co)) {
@@ -18,17 +31,17 @@ nls2 <- function(formula, data = parent.frame(), start,
 		}
 		L$start <- start
 	}
-	finIter <- NROW(L$start)
+	finIter <- if (length(dim(L$start)) == 2) nrow(L$start) else 1
 	L <- append(L, list(...))
 	algorithm <- match.arg(algorithm)
 	if (algorithm == "grid-search") algorithm <- "brute-force"
 	call <- match.call()
-	if (algorithm == "brute-force" || algorithm == "random-search" ||
-	  algorithm == "plinear-brute" || algorithm == "plinear-random") {
+	if (algorithm %in% c("brute-force", "random-search", "lhs",
+	  "plinear-brute-force", "plinear-random-search", "plinear-lhs")) {
 	   nls <- function(formula, data, start, weights, ...) {
-	      nlsModel <- if (algorithm == "plinear-brute" || 
-		algorithm == "plinear-random") stats:::nlsModel.plinear
-	        else stats:::nlsModel
+	      nlsModel <- if (grepl("plinear", algorithm))
+		  makeFun("nlsModel.plinear")
+	        else makeFun("nlsModel")
 	      environment(nlsModel) <- environment()
 	      #  disable nlsModel gradient error
 	      stop <- function(...) {
@@ -57,7 +70,11 @@ nls2 <- function(formula, data = parent.frame(), start,
 	if (missing(start)) return(do.call(nls, L))
 	else L$start <- as.data.frame(as.list(start))
 
-	if (NROW(L$start) == 1) return(do.call(nls, L))
+	if (NROW(L$start) == 1) {
+	   L$data <- data.arg
+	   L$subset <- subset.arg
+	   return(do.call(nls, L, envir = parent.frame()))
+	}
 
 	if (NROW(L$start) == 2) {
 	   if (algorithm == "brute-force" || algorithm == "plinear-brute") {
@@ -75,14 +92,20 @@ nls2 <- function(formula, data = parent.frame(), start,
 		finIter <- k^k1
 		L$start <- expand.grid(lapply(DF, 
 			function(x) seq(x[1], x[2], length = x[3])))
-	   } else {
+	   } else if (algorithm == "lhs" || algorithm == "plinear-lhs") {
+   		finIter <- control$maxiter
+	        u <- t(lhs::randomLHS(finIter, NCOL(start)))
+		L$start <- t(u * unlist(start[1,]) + (1-u) * unlist(start[2,]))
+		L$start <- as.data.frame(L$start)
+		names(L$start) <- names(start)
+   	   } else if (algorithm == "random" || algorithm == "plinear-random") {
 		finIter <- control$maxiter
-		u <- matrix(runif(finIter * NCOL(start)), NCOL(start))
+	        u_vec <- runif(finIter * NCOL(start))
+		u <- matrix(u_vec, NCOL(start))
 		L$start <- t(u * unlist(start[1,]) + (1-u) * unlist(start[2,]))
 		L$start <- as.data.frame(L$start)
 		names(L$start) <- names(start)
 	   }
-		
 	}
 
 	# each component of result is the result of one run
@@ -94,17 +117,17 @@ nls2 <- function(formula, data = parent.frame(), start,
 		yy
 	}
 	result <- apply(L$start, 1, run)
+	if (all(is.na(result))) return(NULL)
 
 	# insert data argument and if !all take only result with minimum RSS
 	if (all) {
-		for(i in seq_along(result)) result[[i]]$data <- substitute(data)
+		for(i in seq_along(result)) result[[i]]$data <- data.arg
 	} else {
 		ss <- lapply(result, function(x) if (identical(x, NA)) NA 
 			else deviance(x)) # deviance is residual sum of squares
 		result <- result[[which.min(ss)]]
-		result$data <- substitute(data)
+		result$data <- data.arg
 	}
 	result
 }
-
 

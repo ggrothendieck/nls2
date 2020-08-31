@@ -1,1 +1,4 @@
 exportPattern(".")
+importFrom("stats", "as.formula", "coef", "deviance", "nls.control", "runif")
+import("proto")
+

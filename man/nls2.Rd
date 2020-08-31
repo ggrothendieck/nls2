@@ -8,12 +8,15 @@
 \usage{
 nls2(formula, data = parent.frame(), start, control = nls.control(),
 	algorithm = c("default", "plinear", "port", "brute-force", 
-	"grid-search", "random-search", "plinear-brute", "plinear-random"), 
-	trace = FALSE, weights, \dots, all = FALSE)
+	"grid-search", "random-search", "lhs", 
+	"plinear-brute", "plinear-random", "plinear-lhs"), 
+	trace = FALSE, weights, subset, \dots, all = FALSE)
 }
 \arguments{
   \item{formula}{same as \code{formula} parameter in \code{nls}.}
-  \item{data}{same as \code{data} parameter in \code{nls}.}
+  \item{data}{same as \code{data} parameter in \code{nls} except that if
+	  \code{subset} is specified then \code{data} is not optional and 
+	  must be specified as a data.frame.}
   \item{start}{same as \code{start} parameter in \code{nls} except that
     it may alternately be (1) a two row data frame in which case \code{nls2}
     will start at each point on a grid chosen to have \code{maxiter} iterations
@@ -23,14 +26,18 @@ nls2(formula, data = parent.frame(), start, control = nls.control(),
     be run with the starting value defined by each row successively or (3) it 
     may be an \code{nls} or other object having a \code{coef} method in 
     which case the \code{coef} of the object will
-    be used as the starting value.}
+    be used as the starting value. The list of vectors format supported in
+    \code{nls} for grouped data is not supported.}
   \item{control}{same as \code{control} parameter in \code{nls}.}
   \item{algorithm}{same as \code{algorithm} parameter in \code{nls}
     with the addition of the \code{"brute-force"} (alternately called 
     \code{"grid-search"}), \code{"random-search"}, 
-    \code{"plinear-brute"} and \code{"plinear-random"} options.}
+    \code{"lhs"} (Latin Hypercube Sampling),
+    \code{"plinear-brute"}, \code{"plinear-random"} and
+    \code{"plinear-lhs"} options.}
   \item{trace}{If \code{TRUE} certain intermedidate results shown.}
   \item{weights}{For weighted regression.}
+  \item{subset}{Subset argument as in \code{nls}}
   \item{\dots}{other arguments passed to \code{nls}.}
   \item{all}{if \code{all} is true then a list of \code{nls} objects is
     returned, one for each row in \code{start}; otherwise, only the one
@@ -139,8 +146,8 @@ nls2(fo, start = st2, control = nls.control(warnOnly = TRUE))
 
 ## Example 4
 
-# Investigate singular gradient.
-# Note that this cannot be done with nls since the singular gradient at
+# Investigate singular jacobian at the start value
+# Note that this cannot be done with nls since the singular jacobian at
 #  the initial conditions would stop it with an error.
 
 DF1 <- data.frame(y=1:9, one=rep(1,9))
@@ -149,9 +156,11 @@ svd(xx$m$Rmat())[-2]
 
 ## Example 5
 
-# plinear example 
+# plinear-lhs example 
 # Thanks to John Nash for suggesting this truncation of the 
 # Ratkowsky2 dataset. Full dataset: data(Ratkowsky2, package = "NISTnls")
+# Use plinear-lhs to get starting values and then run nls via nls2 for 
+# final answer.
 
 pastured <- data.frame(
   time=c(9, 14, 21, 28, 42, 57, 63, 70, 79),
@@ -159,9 +168,10 @@ pastured <- data.frame(
 fo <- yield ~ cbind(1, - exp(-exp(t3+t4*log(time))))
 
 gstart <- data.frame(t3 = c(-10, 10), t4 = c(1, 8))
-fm <- nls2(fo, data = pastured, start = gstart, alg = "plinear",
+set.seed(123)
+fm0 <- nls2(fo, data = pastured, start = gstart, alg = "plinear-lhs",
    control = nls.control(maxiter = 1000))
-fm
+nls2(fo, pastured, start = fm0, alg = "plinear")
 
 }
 \keyword{nonlinear}
