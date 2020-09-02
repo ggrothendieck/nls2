@@ -3,11 +3,6 @@ nls2 <- function(formula, data = parent.frame(), start,
 	algorithm = c("default", "plinear", "port", "brute-force", "grid-search", "random-search", "lhs", "plinear-brute", "plinear-random", "plinear-lhs"), 
 	trace = FALSE, weights, subset, ..., all = FALSE) { 
 
-	makeFun <- function(FUN, PKG = "stats") {
-		s <- paste0(PKG, ":::", FUN)
-		eval.parent(parse(text = s))
-	}
-
 	# if formula is not of class "formula" convert it to "formula" class
 	if (!inherits(formula, "formula")) formula <- as.formula(formula, 
 		env = parent.frame())
@@ -39,9 +34,8 @@ nls2 <- function(formula, data = parent.frame(), start,
 	if (algorithm %in% c("brute-force", "random-search", "lhs",
 	  "plinear-brute-force", "plinear-random-search", "plinear-lhs")) {
 	   nls <- function(formula, data, start, weights, ...) {
-	      nlsModel <- if (grepl("plinear", algorithm))
-		  makeFun("nlsModel.plinear")
-	        else makeFun("nlsModel")
+	      nlsModel <- if (grepl("plinear", algorithm)) nlsModel.plinear
+	        else nlsModel
 	      environment(nlsModel) <- environment()
 	      #  disable nlsModel gradient error
 	      stop <- function(...) {
